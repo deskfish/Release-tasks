@@ -152,6 +152,31 @@
             background: linear-gradient(45deg, #28a745, #20c997);
             transition: width 0.6s ease;
         }
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        .progress-text {
+            font-size: 1.1em;
+        }
+        .progress-percentage {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #28a745;
+        }
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        .progress-stats strong {
+            color: #2c3e50;
+            font-weight: 600;
+        }
         h2 {
             color: #2c3e50;
             font-weight: 700;
@@ -198,12 +223,23 @@
     </div>
     
     <div class="operation-area">
-        <div class="progress">
-            <div class="progress-bar bg-success" role="progressbar" 
-                 th:style="'width: ' + ${task.currentAgreeCount * 100 / task.needAgreesCount} + '%'" 
-                 th:aria-valuenow="${task.currentAgreeCount}" 
-                 aria-valuemin="0" 
-                 th:aria-valuemax="${task.needAgreesCount}"></div>
+        <div class="progress-container">
+            <div class="progress-info mb-2">
+                <span class="progress-text">当前进度</span>
+                <span class="progress-percentage" th:text="${#numbers.formatDecimal(task.currentAgreeCount * 100 / task.needAgreesCount, 1, 1)} + '%'"></span>
+            </div>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" 
+                     th:style="'width: ' + ${task.currentAgreeCount * 100 / task.needAgreesCount} + '%'" 
+                     th:aria-valuenow="${task.currentAgreeCount}" 
+                     aria-valuemin="0" 
+                     th:aria-valuemax="${task.needAgreesCount}">
+                </div>
+            </div>
+            <div class="progress-stats mt-2">
+                <span class="current-count">已同意: <strong th:text="${task.currentAgreeCount}"></strong></span>
+                <span class="total-count">目标: <strong th:text="${task.needAgreesCount}"></strong></span>
+            </div>
         </div>
 
         <div th:if="${task.taskInvalid}" class="alert alert-danger mt-4 animate__animated animate__fadeIn">❌ 任务已失效</div>
