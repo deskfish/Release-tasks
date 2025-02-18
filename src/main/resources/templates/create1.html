@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>创建任务</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/animate.css@4.1.1/animate.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .form-control:focus {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.1em;
+            background: linear-gradient(45deg, #4a90e2, #5cb3ff);
+            border: none;
+            transition: transform 0.2s;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+        .user-checkboxes {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ced4da;
+            border-radius: 0.25rem;
+            padding: 10px;
+        }
+        .form-check-input:checked {
+            background-color: #4a90e2;
+            border-color: #4a90e2;
+        }
+        .user-name {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .user-role {
+            color: #666;
+            font-size: 0.9em;
+            font-style: italic;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        .success-message {
+            display: none;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container animate__animated animate__fadeIn">
+    <h2 class="text-center">🚀 创建发布任务</h2>
+    <form id="createTaskForm" th:action="@{/release/create}" method="post" class="needs-validation" novalidate>
+        <div class="mb-4">
+            <label for="taskName" class="form-label">任务名称</label>
+            <input type="text" id="taskName" name="taskName" class="form-control" required
+                   placeholder="请输入任务名称">
+            <div class="invalid-feedback">请输入任务名称</div>
+        </div>
+        <div class="mb-4">
+            <label for="taskDetail" class="form-label">任务详情</label>
+            <textarea id="taskDetail" name="taskDetail" class="form-control" rows="3" required
+                      placeholder="请输入任务详细信息"></textarea>
+            <div class="invalid-feedback">请输入任务详情</div>
+        </div>
+        <div class="mb-4">
+            <label class="form-label">选择参与投票的用户</label>
+            <div id="userCheckboxes" class="user-checkboxes">
+                <!-- 用户列表将通过JavaScript动态加载 -->
+            </div>
+            <div class="invalid-feedback">请至少选择一个用户</div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-submit">创建任务</button>
+    </form>
+    <div class="alert alert-success success-message" role="alert">
+        任务创建成功！链接已生成。
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // 防抖函数
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+
+    // 错误处理函数
+    function handleError(error, customMessage = '操作失败') {
+        console.error(error);
+        const errorMessage = error.message || customMessage;
+        const alertElement = document.createElement('div');
+        alertElement.className = 'alert alert-danger alert-dismissible fade show mt-3';
+        alertElement.innerHTML = `
+            ${errorMessage}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.querySelector('.container').appendChild(alertElement);
+        setTimeout(() => alertElement.remove(), 5000);
+    }
+
+    // 加载用户列表
+    const userCheckboxes = document.getElementById('userCheckboxes');
+    async function loadUsers() {
+        try {
+            userCheckboxes.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">加载中...</span></div></div>';
+            
+            const response = await fetch('/api/users/active');
+            if (!response.ok) throw new Error(`获取用户列表失败: ${response.status}`);
+            
+            const data = await response.json();
+            if (!data?.code === 200 || !Array.isArray(data.data)) {
+                throw new Error('无效的用户数据格式');
+            }
+
+            const fragment = document.createDocumentFragment();
+            data.data.forEach(user => {
+                const div = document.createElement('div');
+                div.className = 'form-check mb-2';
+                div.innerHTML = `
+                    <input class="form-check-input" type="checkbox" name="selectedUsers" 
+                           value="${user.username}" id="user-${user.username}">
+                    <label class="form-check-label" for="user-${user.username}">
+                        <span class="user-name">${user.username}</span>
+                        ${user.displayName ? `<span class="user-role"> - ${user.displayName}</span>` : ''}
+                    </label>
+                `;
+                fragment.appendChild(div);
+            });
+            
+            userCheckboxes.innerHTML = '';
+            userCheckboxes.appendChild(fragment);
+        } catch (error) {
+            handleError(error, '获取用户列表失败，请刷新页面重试');
+        }
+    }
+
+    // 表单提交处理
+    const form = document.getElementById('createTaskForm');
+    const submitButton = form.querySelector('button[type="submit"]');
+    const successMessage = document.querySelector('.success-message');
+
+    async function handleSubmit(event) {
+        event.preventDefault();
+        
+        // 表单验证
+        if (!form.checkValidity()) {
+            event.stopPropagation();
+            form.classList.add('was-validated');
+            return;
+        }
+
+        // 检查是否选择了用户
+        const selectedUsers = form.querySelectorAll('input[name="selectedUsers"]:checked');
+        if (selectedUsers.length === 0) {
+            handleError(new Error('请至少选择一个用户'));
+            return;
+        }
+
+        try {
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> 提交中...';
+
+            const formData = new FormData(form);
+            const response = await fetch(form.action, {
+                method: 'POST',
+                body: new URLSearchParams(formData)
+            });
+
+            if (!response.ok) throw new Error(`创建任务失败: ${response.status}`);
+            
+            const data = await response.json();
+            if (data.code === 200) {
+                successMessage.style.display = 'block';
+                successMessage.innerHTML = `任务创建成功！<a href="${data.data}" target="blank" class="alert-link">点击此处访问任务</a>`;
+                form.reset();
+                form.classList.remove('was-validated');
+            } else {
+                throw new Error(data.message || '创建任务失败');
+            }
+        } catch (error) {
+            handleError(error);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.innerHTML = '创建任务';
+        }
+    }
+
+    // 初始化
+    loadUsers();
+    form.addEventListener('submit', debounce(handleSubmit, 500));
+</script>
+</body>
+</html>
