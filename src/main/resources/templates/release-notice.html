@@ -17,12 +17,22 @@
             font-family: 'Noto Sans SC', sans-serif;
         }
         .container {
-            max-width: 600px;
+            max-width: 1200px;
             background: rgba(255, 255, 255, 0.95);
             padding: 35px;
             border-radius: 20px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        .task-info {
+            padding-right: 30px;
+            border-right: 2px solid rgba(0, 0, 0, 0.1);
+        }
+        .operation-area {
+            padding-left: 30px;
         }
         .list-group-item {
             border: none;
@@ -175,52 +185,55 @@
 </head>
 <body>
 <div class="container animate__animated animate__fadeIn" th:data-task-id="${task.id}">
-    <h2 class="text-center mb-4">🚀 发版通知</h2>
-    <div class="text-center mb-4" id="beijingTime" style="color: #2c3e50; font-size: 1.2em; font-weight: 500;"></div>
-    
-    <div class="progress">
-        <div class="progress-bar bg-success" role="progressbar" 
-             th:style="'width: ' + ${task.currentAgreeCount * 100 / task.needAgreesCount} + '%'" 
-             th:aria-valuenow="${task.currentAgreeCount}" 
-             aria-valuemin="0" 
-             th:aria-valuemax="${task.needAgreesCount}"></div>
+    <div class="task-info">
+        <h2 class="text-center mb-4">🚀 发版通知</h2>
+        <div class="text-center mb-4" id="beijingTime" style="color: #2c3e50; font-size: 1.2em; font-weight: 500;"></div>
+        <ul class="list-group animate__animated animate__fadeInUp">
+            <li class="list-group-item"><strong>任务ID:</strong> <span th:text="${task.id}"></span></li>
+            <li class="list-group-item"><strong>任务名称:</strong> <span th:text="${task.taskName}"></span></li>
+            <li class="list-group-item"><strong>任务详情:</strong> <span th:text="${task.taskDetail}"></span></li>
+            <li class="list-group-item"><strong>需要同意的人数:</strong> <span th:text="${task.needAgreesCount}"></span></li>
+            <li class="list-group-item"><strong>当前已同意的人数:</strong> <span th:text="${task.currentAgreeCount}"></span></li>
+        </ul>
     </div>
     
-    <ul class="list-group animate__animated animate__fadeInUp">
-        <li class="list-group-item"><strong>任务ID:</strong> <span th:text="${task.id}"></span></li>
-        <li class="list-group-item"><strong>任务名称:</strong> <span th:text="${task.taskName}"></span></li>
-        <li class="list-group-item"><strong>任务详情:</strong> <span th:text="${task.taskDetail}"></span></li>
-        <li class="list-group-item"><strong>需要同意的人数:</strong> <span th:text="${task.needAgreesCount}"></span></li>
-        <li class="list-group-item"><strong>当前已同意的人数:</strong> <span th:text="${task.currentAgreeCount}"></span></li>
-    </ul>
-
-    <div th:if="${task.taskInvalid}" class="alert alert-danger mt-4 animate__animated animate__fadeIn">❌ 任务已失效</div>
-    <div th:if="${task.end and !task.taskInvalid}" class="alert alert-success mt-4 animate__animated animate__fadeIn">✅ 任务已执行</div>
-
-
-
-    <div class="mb-4" th:if="${!task.end and !task.taskInvalid}">
-        <label class="form-label">选择您的身份</label>
-        <div id="userList" class="list-group">
-            <!-- 用户列表将通过JavaScript动态加载 -->
+    <div class="operation-area">
+        <div class="progress">
+            <div class="progress-bar bg-success" role="progressbar" 
+                 th:style="'width: ' + ${task.currentAgreeCount * 100 / task.needAgreesCount} + '%'" 
+                 th:aria-valuenow="${task.currentAgreeCount}" 
+                 aria-valuemin="0" 
+                 th:aria-valuemax="${task.needAgreesCount}"></div>
         </div>
-        <div class="invalid-feedback">请选择您的身份</div>
+
+        <div th:if="${task.taskInvalid}" class="alert alert-danger mt-4 animate__animated animate__fadeIn">❌ 任务已失效</div>
+        <div th:if="${task.end and !task.taskInvalid}" class="alert alert-success mt-4 animate__animated animate__fadeIn">✅ 任务已执行</div>
+
+        <div class="mb-4" th:if="${!task.end and !task.taskInvalid}">
+            <label class="form-label">选择您的身份</label>
+            <div id="userList" class="list-group">
+                <!-- 用户列表将通过JavaScript动态加载 -->
+            </div>
+            <div class="invalid-feedback">请选择您的身份</div>
+        </div>
+
+        <div class="btn-group mt-4" role="group" th:if="${!task.end and !task.taskInvalid}">
+            <button onclick="submitDecision(true)" class="btn btn-success animate__animated" data-action="agree" disabled>
+                <i class="fas fa-check"></i> 同意
+            </button>
+            <button onclick="submitDecision(false)" class="btn btn-danger animate__animated" data-action="reject" disabled>
+                <i class="fas fa-times"></i> 拒绝
+            </button>
+        </div>
+
+        <div class="mt-4 mb-4">
+            <button onclick="toggleIpRecords()" class="btn btn-info w-100 animate__animated" id="toggleIpRecordsBtn">
+                <i class="fas fa-list"></i> <span>查看点击状况</span>
+            </button>
+            <div id="ipRecordsList" class="list-group mt-3 animate__animated animate__fadeIn" style="display: none;"></div>
+        </div>
+        <div id="actionFeedback" class="alert mt-3" style="display: none;"></div>
     </div>
-    <div class="btn-group mt-4" role="group" th:if="${!task.end and !task.taskInvalid}">
-        <button onclick="submitDecision(true)" class="btn btn-success animate__animated" data-action="agree" disabled>
-            <i class="fas fa-check"></i> 同意
-        </button>
-        <button onclick="submitDecision(false)" class="btn btn-danger animate__animated" data-action="reject" disabled>
-            <i class="fas fa-times"></i> 拒绝
-        </button>
-    </div>
-    <div class="mt-4 mb-4">
-        <button onclick="toggleIpRecords()" class="btn btn-info w-100 animate__animated" id="toggleIpRecordsBtn">
-            <i class="fas fa-list"></i> <span>查看点击状况</span>
-        </button>
-        <div id="ipRecordsList" class="list-group mt-3 animate__animated animate__fadeIn" style="display: none;"></div>
-    </div>
-    <div id="actionFeedback" class="alert mt-3" style="display: none;"></div>
 
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script>
