@@ -16,6 +16,7 @@
             padding: 20px 0;
             font-family: 'Noto Sans SC', sans-serif;
         }
+
         .container {
             max-width: 1200px;
             background: rgba(255, 255, 255, 0.95);
@@ -27,13 +28,16 @@
             grid-template-columns: 1fr 1fr;
             gap: 30px;
         }
+
         .task-info {
             padding-right: 30px;
             border-right: 2px solid rgba(0, 0, 0, 0.1);
         }
+
         .operation-area {
             padding-left: 30px;
         }
+
         .list-group-item {
             border: none;
             padding: 20px;
@@ -43,65 +47,77 @@
             transition: all 0.3s ease;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
         }
+
         .list-group-item:hover {
             transform: translateX(5px) translateY(-2px);
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
+
         .btn-group {
             display: flex;
-            gap: 25px;
-            justify-content: center;
-            margin-top: 35px;
+            gap: 12px;
+            justify-content: flex-end;
+            margin: 0;
+            align-items: center;
         }
+
         .btn {
-            padding: 15px 45px;
+            padding: 8px 20px;
             font-weight: 600;
             border-radius: 50px;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
-            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            border: none;
+            min-width: 100px;
+            font-size: 16px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
+
+        .custom-btn {
+            border-radius: 5px;
+            padding: 10px;
+            display: inline-block;
+            vertical-align: middle;
+        }
+
         .btn-success {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            border: none;
-        }
-        .btn-danger {
-            background: linear-gradient(45deg, #dc3545, #ff4757);
-            border: none;
-        }
-        .btn-info {
-            background: linear-gradient(45deg, #17a2b8, #4dc0b5);
-            border: none;
+            background-color: green;
             color: white;
+            display: inline-block;
+            vertical-align: middle;
+            width: 5px;
         }
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 0;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.2);
-            transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: -1;
+
+        .btn-danger {
+            background-color: red;
+            color: white;
+            display: inline-block;
+            vertical-align: middle;
         }
-        .btn:hover::before {
-            width: 100%;
-        }
+
         .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.2);
+            transform: translateY(-2px);
+            filter: brightness(1.1);
         }
+
         .btn:active {
-            transform: translateY(-1px);
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
+            transform: translateY(0);
         }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
         .btn i {
-            margin-right: 10px;
+            margin: 0;
             font-size: 1.2em;
         }
+
         .form-label {
             font-size: 1.2em;
             font-weight: 600;
@@ -113,12 +129,14 @@
             -webkit-text-fill-color: transparent;
             transition: all 0.3s ease;
         }
+
         .form-label:hover {
             transform: translateX(5px);
             background: linear-gradient(45deg, #3498db, #2c3e50);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+
         .alert {
             margin-top: 25px;
             padding: 20px;
@@ -126,6 +144,7 @@
             font-weight: 500;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
         }
+
         .fixed-bottom-container {
             position: fixed;
             bottom: 0;
@@ -138,45 +157,104 @@
             z-index: 1000;
             text-align: center;
         }
+
         .content-wrapper {
             padding-bottom: 80px;
         }
+
         .progress {
-            height: 12px;
+            height: 20px;
             margin: 25px 0;
-            border-radius: 8px;
-            background: rgba(0, 0, 0, 0.05);
+            border-radius: 10px;
+            background: #f0f0f0;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .progress-bar {
+            background: linear-gradient(45deg, #4CAF50, #8BC34A);
+            transition: width 0.8s ease-in-out;
+            position: relative;
             overflow: hidden;
         }
-        .progress-bar {
-            background: linear-gradient(45deg, #28a745, #20c997);
-            transition: width 0.6s ease;
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                    45deg,
+                    rgba(255, 255, 255, 0.2) 25%,
+                    transparent 25%,
+                    transparent 50%,
+                    rgba(255, 255, 255, 0.2) 50%,
+                    rgba(255, 255, 255, 0.2) 75%,
+                    transparent 75%
+            );
+            background-size: 25px 25px;
+            animation: move 2s linear infinite;
+            opacity: 0.5;
         }
+
+        @keyframes move {
+            0% {
+                background-position: 0 0;
+            }
+            100% {
+                background-position: 50px 50px;
+            }
+        }
+
         .progress-info {
             display: flex;
             justify-content: space-between;
             align-items: center;
             color: #2c3e50;
             font-weight: 500;
+            margin-bottom: 10px;
         }
+
         .progress-text {
-            font-size: 1.1em;
-        }
-        .progress-percentage {
             font-size: 1.2em;
             font-weight: 600;
-            color: #28a745;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
+
+        .progress-percentage {
+            font-size: 1.4em;
+            font-weight: 700;
+            color: #4CAF50;
+            text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.1);
+        }
+
         .progress-stats {
             display: flex;
             justify-content: space-between;
-            color: #6c757d;
-            font-size: 0.9em;
+            color: #666;
+            font-size: 1em;
+            margin-top: 10px;
+            padding: 0 5px;
         }
+
         .progress-stats strong {
             color: #2c3e50;
-            font-weight: 600;
+            font-weight: 700;
+            margin-left: 5px;
         }
+
+        .progress-container {
+            background: white;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
+
         h2 {
             color: #2c3e50;
             font-weight: 700;
@@ -184,6 +262,7 @@
             position: relative;
             display: inline-block;
         }
+
         h2::after {
             content: '';
             position: absolute;
@@ -194,14 +273,17 @@
             background: linear-gradient(to right, #84fab0, #8fd3f4);
             border-radius: 2px;
         }
+
         .badge {
             padding: 8px 15px;
             font-size: 0.9em;
             border-radius: 20px;
         }
+
         #ipRecordsList .list-group-item {
             background: linear-gradient(to right, #ffffff, #f8f9fa);
         }
+
         .spinner-border {
             width: 2rem;
             height: 2rem;
@@ -212,27 +294,31 @@
 <div class="container animate__animated animate__fadeIn" th:data-task-id="${task.id}">
     <div class="task-info">
         <h2 class="text-center mb-4">🚀 发版通知</h2>
-        <div class="text-center mb-4" id="beijingTime" style="color: #2c3e50; font-size: 1.2em; font-weight: 500;"></div>
+        <div class="text-center mb-4" id="beijingTime"
+             style="color: #2c3e50; font-size: 1.2em; font-weight: 500;"></div>
         <ul class="list-group animate__animated animate__fadeInUp">
             <li class="list-group-item"><strong>任务ID:</strong> <span th:text="${task.id}"></span></li>
             <li class="list-group-item"><strong>任务名称:</strong> <span th:text="${task.taskName}"></span></li>
             <li class="list-group-item"><strong>任务详情:</strong> <span th:text="${task.taskDetail}"></span></li>
-            <li class="list-group-item"><strong>需要同意的人数:</strong> <span th:text="${task.needAgreesCount}"></span></li>
-            <li class="list-group-item"><strong>当前已同意的人数:</strong> <span th:text="${task.currentAgreeCount}"></span></li>
+            <li class="list-group-item"><strong>需要同意的人数:</strong> <span th:text="${task.needAgreesCount}"></span>
+            </li>
+            <li class="list-group-item"><strong>当前已同意的人数:</strong> <span
+                    th:text="${task.currentAgreeCount}"></span></li>
         </ul>
     </div>
-    
+
     <div class="operation-area">
         <div class="progress-container">
             <div class="progress-info mb-2">
                 <span class="progress-text">当前进度</span>
-                <span class="progress-percentage" th:text="${#numbers.formatDecimal(task.currentAgreeCount * 100 / task.needAgreesCount, 1, 1)} + '%'"></span>
+                <span class="progress-percentage"
+                      th:text="${#numbers.formatDecimal(task.currentAgreeCount * 100 / task.needAgreesCount, 1, 1)} + '%'"></span>
             </div>
             <div class="progress">
-                <div class="progress-bar" role="progressbar" 
-                     th:style="'width: ' + ${task.currentAgreeCount * 100 / task.needAgreesCount} + '%'" 
-                     th:aria-valuenow="${task.currentAgreeCount}" 
-                     aria-valuemin="0" 
+                <div class="progress-bar" role="progressbar"
+                     th:style="'width: ' + ${task.currentAgreeCount * 100 / task.needAgreesCount} + '%'"
+                     th:aria-valuenow="${task.currentAgreeCount}"
+                     aria-valuemin="0"
                      th:aria-valuemax="${task.needAgreesCount}">
                 </div>
             </div>
@@ -242,176 +328,156 @@
             </div>
         </div>
 
-        <div th:if="${task.taskInvalid}" class="alert alert-danger mt-4 animate__animated animate__fadeIn">❌ 任务已失效</div>
-        <div th:if="${task.end and !task.taskInvalid}" class="alert alert-success mt-4 animate__animated animate__fadeIn">✅ 任务已执行</div>
+        <div th:if="${task.taskInvalid}" class="alert alert-danger mt-4 animate__animated animate__fadeIn">❌
+            任务已失效
+        </div>
+        <div th:if="${task.end and !task.taskInvalid}"
+             class="alert alert-success mt-4 animate__animated animate__fadeIn">✅ 任务已执行
+        </div>
 
         <div class="mb-4" th:if="${!task.end and !task.taskInvalid}">
-            <label class="form-label">选择您的身份</label>
+            <label class="form-label">请选择操作</label>
             <div id="userList" class="list-group">
                 <!-- 用户列表将通过JavaScript动态加载 -->
             </div>
-            <div class="invalid-feedback">请选择您的身份</div>
-        </div>
-
-        <div class="btn-group mt-4" role="group" th:if="${!task.end and !task.taskInvalid}">
-            <button onclick="submitDecision(true)" class="btn btn-success animate__animated" data-action="agree" disabled>
-                <i class="fas fa-check"></i> 同意
-            </button>
-            <button onclick="submitDecision(false)" class="btn btn-danger animate__animated" data-action="reject" disabled>
-                <i class="fas fa-times"></i> 拒绝
-            </button>
         </div>
 
         <div class="mt-4 mb-4">
             <button onclick="toggleIpRecords()" class="btn btn-info w-100 animate__animated" id="toggleIpRecordsBtn">
                 <i class="fas fa-list"></i> <span>查看点击状况</span>
             </button>
-            <div id="ipRecordsList" class="list-group mt-3 animate__animated animate__fadeIn" style="display: none;"></div>
+            <div id="ipRecordsList" class="list-group mt-3 animate__animated animate__fadeIn"
+                 style="display: none;"></div>
         </div>
         <div id="actionFeedback" class="alert mt-3" style="display: none;"></div>
     </div>
 
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script>
-    // 页面加载时获取所有用户列表
-    document.addEventListener('DOMContentLoaded', function() {
-        const taskId = document.querySelector('.container').getAttribute('data-task-id');
-        
-        // 获取用户列表和操作记录
-        fetch('/release/' + taskId + '/user-records')
-            .then(response => response.json())
-            .then(response => {
-                if (response.code === 200) {
-                    // 更新操作记录列表
-                    updateIpRecordsList(response.data);
-                    
-                    // 更新用户列表
-                    const userList = document.getElementById('userList');
-                    const unoperatedUsers = response.data.filter(record => !record.operated);
-                    
-                    if (unoperatedUsers.length === 0) {
-                        userList.innerHTML = '<div class="text-center text-muted p-3">暂无可选用户</div>';
-                        return;
-                    }
+        // 页面加载时获取所有用户列表
+        document.addEventListener('DOMContentLoaded', function () {
+            const taskId = document.querySelector('.container').getAttribute('data-task-id');
 
-                    unoperatedUsers.forEach(user => {
-                        const item = document.createElement('div');
-                        item.className = 'list-group-item list-group-item-action d-flex justify-content-between align-items-center';
-                        item.innerHTML = `
-                            <div class="form-check w-100">
-                                <input class="form-check-input" type="radio" name="userRadio" 
-                                       id="user_${user.username}" value="${user.username}">
-                                <label class="form-check-label w-100" for="user_${user.username}">
-                                    ${user.displayName || user.username}
-                                </label>
+            // 获取用户列表和操作记录
+            fetch('/release/' + taskId + '/user-records')
+                .then(response => response.json())
+                .then(response => {
+                    if (response.code === 200) {
+                        // 更新操作记录列表
+                        updateIpRecordsList(response.data);
+
+                        // 更新用户列表
+                        const userList = document.getElementById('userList');
+                        const unoperatedUsers = response.data.filter(record => !record.operated);
+
+                        if (unoperatedUsers.length === 0) {
+                            userList.innerHTML = '<div class="text-center text-muted p-3">暂无可选用户</div>';
+                            return;
+                        }
+
+                        unoperatedUsers.forEach(user => {
+                            const item = document.createElement('div');
+                            item.className = 'list-group-item d-flex justify-content-between align-items-center';
+                            item.innerHTML = `
+                            <div class="user-info">
+                                <strong>${user.displayName || user.username}</strong>
                             </div>
+                          <div class="btn-group" role="group">
+                            <button onclick="submitDecision(true, '${user.username}')" class="btn btn-success " style="border-radius: 15px;  display: flex;  align-items: center; justify-content: center;">
+                                同意
+                            </button>
+                            <button onclick="submitDecision(false, '${user.username}')" class="btn btn-danger " style="border-radius: 15px;  display: flex; align-items: center; justify-content: center;">
+                             拒绝
+                            </button>
+                                </div>
                         `;
-                        userList.appendChild(item);
-                    });
-
-                    // 监听单选框选择变化
-                    document.querySelectorAll('input[name="userRadio"]').forEach(radio => {
-                        radio.addEventListener('change', function() {
-                            const buttons = document.querySelectorAll('.btn-group button');
-                            buttons.forEach(btn => btn.disabled = !this.checked);
+                            userList.appendChild(item);
                         });
-                    });
-                } else {
+                    }
+                })
+                .catch(error => {
                     const userList = document.getElementById('userList');
                     userList.innerHTML = '<div class="alert alert-danger">加载用户列表失败，请刷新页面重试</div>';
                     document.getElementById('ipRecordsList').innerHTML = '<div class="alert alert-danger">加载操作记录失败，请刷新页面重试</div>';
-                }
-            })
-            .catch(error => {
-                const userList = document.getElementById('userList');
-                userList.innerHTML = '<div class="alert alert-danger">加载用户列表失败，请刷新页面重试</div>';
-                document.getElementById('ipRecordsList').innerHTML = '<div class="alert alert-danger">加载操作记录失败，请刷新页面重试</div>';
-            });
-    });
-
-    function submitDecision(agreed) {
-        const selectedRadio = document.querySelector('input[name="userRadio"]:checked');
-        if (!selectedRadio) {
-            showFeedback('请先选择您的身份', 'warning');
-            return;
-        }
-
-        const username = selectedRadio.value;
-        if (!username) {
-            showFeedback('请先选择您的身份', 'warning');
-            return;
-        }
-
-        const buttons = document.querySelectorAll('.btn-group button');
-        const taskId = document.querySelector('.container').getAttribute('data-task-id');
-        
-        // 禁用按钮并显示加载动画
-        buttons.forEach(btn => {
-            btn.disabled = true;
-            btn.classList.add('animate__pulse');
+                });
         });
 
-        fetch(`/release/${taskId}/approve`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-            },
-            body: `agreed=${agreed}&username=${encodeURIComponent(username)}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            buttons.forEach(btn => btn.classList.remove('animate__pulse'));
-            
-            if (data.code === 200) {
-                showFeedback(agreed ? '✅ 已同意' : '❌ 已拒绝', 'success');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                const errorMessage = data.message || '操作失败，请稍后重试';
-                showFeedback(errorMessage, 'danger');
-                
-                if (data.code === 400 && (data.message.includes('已经操作过') || data.message.includes('无权操作'))) {
-                    buttons.forEach(btn => btn.disabled = true);
-                } else {
+        function submitDecision(agreed, username) {
+            if (!username) {
+                showFeedback('用户信息无效', 'warning');
+                return;
+            }
+
+            const buttons = document.querySelectorAll('.btn-group button');
+            const taskId = document.querySelector('.container').getAttribute('data-task-id');
+
+            // 禁用按钮并显示加载动画
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('animate__pulse');
+            });
+
+            fetch(`/release/${taskId}/approve`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `agreed=${agreed}&username=${encodeURIComponent(username)}`
+            })
+                .then(response => response.json())
+                .then(data => {
+                    buttons.forEach(btn => btn.classList.remove('animate__pulse'));
+
+                    if (data.code === 200) {
+                        showFeedback(agreed ? '✅ 已同意' : '❌ 已拒绝', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        const errorMessage = data.message || '操作失败，请稍后重试';
+                        showFeedback(errorMessage, 'danger');
+
+                        if (data.code === 400 && (data.message.includes('已经操作过') || data.message.includes('无权操作'))) {
+                            buttons.forEach(btn => btn.disabled = true);
+                        } else {
+                            buttons.forEach(btn => {
+                                btn.disabled = false;
+                                btn.classList.remove('animate__pulse');
+                            });
+                        }
+                    }
+                })
+                .catch(error => {
+                    showFeedback('操作失败，请重试', 'danger');
                     buttons.forEach(btn => {
                         btn.disabled = false;
                         btn.classList.remove('animate__pulse');
                     });
-                }
-            }
-        })
-        .catch(error => {
-            showFeedback('操作失败，请重试', 'danger');
-            buttons.forEach(btn => {
-                btn.disabled = false;
+                });
+        }
+
+        function showFeedback(message, type) {
+            const feedback = document.getElementById('actionFeedback');
+            feedback.className = `alert alert-${type} mt-3 animate__animated animate__fadeIn`;
+            feedback.textContent = message;
+            feedback.style.display = 'block';
+        }
+
+        document.querySelectorAll('.btn-group button').forEach(btn => {
+            btn.addEventListener('mouseenter', () => {
+                btn.classList.add('animate__pulse');
+            });
+            btn.addEventListener('mouseleave', () => {
                 btn.classList.remove('animate__pulse');
             });
         });
-    }
 
-    function showFeedback(message, type) {
-        const feedback = document.getElementById('actionFeedback');
-        feedback.className = `alert alert-${type} mt-3 animate__animated animate__fadeIn`;
-        feedback.textContent = message;
-        feedback.style.display = 'block';
-    }
+        function updateIpRecordsList(records) {
+            const ipRecordsList = document.getElementById('ipRecordsList');
+            if (records.length === 0) {
+                ipRecordsList.innerHTML = '<div class="text-center text-muted">暂无记录</div>';
+                return;
+            }
 
-    document.querySelectorAll('.btn-group button').forEach(btn => {
-        btn.addEventListener('mouseenter', () => {
-            btn.classList.add('animate__pulse');
-        });
-        btn.addEventListener('mouseleave', () => {
-            btn.classList.remove('animate__pulse');
-        });
-    });
-
-    function updateIpRecordsList(records) {
-        const ipRecordsList = document.getElementById('ipRecordsList');
-        if (records.length === 0) {
-            ipRecordsList.innerHTML = '<div class="text-center text-muted">暂无记录</div>';
-            return;
-        }
-
-        ipRecordsList.innerHTML = `
+            ipRecordsList.innerHTML = `
             <div class="mb-3">
                 <h5>已点击用户</h5>
                 ${records.filter(record => record.operated).map(record => `
@@ -443,41 +509,41 @@
                 `).join('') || '<div class="text-center text-muted">暂无未点击用户</div>'}
             </div>
         `;
-    }
-
-    function toggleIpRecords() {
-        const taskId = document.querySelector('.container').getAttribute('data-task-id');
-        const ipRecordsList = document.getElementById('ipRecordsList');
-        const toggleBtn = document.getElementById('toggleIpRecordsBtn');
-        const toggleBtnText = toggleBtn.querySelector('span');
-        
-        if (ipRecordsList.style.display === 'none') {
-            ipRecordsList.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">加载中...</span></div></div>';
-            ipRecordsList.style.display = 'block';
-            toggleBtnText.textContent = '收起点击状况';
-            
-            fetch(`/release/${taskId}/user-records`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.code === 200) {
-                        updateIpRecordsList(data.data);
-                    } else {
-                        ipRecordsList.innerHTML = `<div class="alert alert-danger">加载失败: ${data.message}</div>`;
-                    }
-                })
-                .catch(error => {
-                    ipRecordsList.innerHTML = '<div class="alert alert-danger">加载失败，请重试</div>';
-                });
-        } else {
-            ipRecordsList.style.display = 'none';
-            toggleBtnText.textContent = '查看点击状况';
         }
-    }
+
+        function toggleIpRecords() {
+            const taskId = document.querySelector('.container').getAttribute('data-task-id');
+            const ipRecordsList = document.getElementById('ipRecordsList');
+            const toggleBtn = document.getElementById('toggleIpRecordsBtn');
+            const toggleBtnText = toggleBtn.querySelector('span');
+
+            if (ipRecordsList.style.display === 'none') {
+                ipRecordsList.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">加载中...</span></div></div>';
+                ipRecordsList.style.display = 'block';
+                toggleBtnText.textContent = '收起点击状况';
+
+                fetch(`/release/${taskId}/user-records`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.code === 200) {
+                            updateIpRecordsList(data.data);
+                        } else {
+                            ipRecordsList.innerHTML = `<div class="alert alert-danger">加载失败: ${data.message}</div>`;
+                        }
+                    })
+                    .catch(error => {
+                        ipRecordsList.innerHTML = '<div class="alert alert-danger">加载失败，请重试</div>';
+                    });
+            } else {
+                ipRecordsList.style.display = 'none';
+                toggleBtnText.textContent = '查看点击状况';
+            }
+        }
     </script>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
+<script>
     // 更新北京时间的函数
     function updateBeijingTime() {
         const now = new Date();
@@ -494,6 +560,6 @@
     // 初始化时间显示并每秒更新
     updateBeijingTime();
     setInterval(updateBeijingTime, 1000);
-    </script>
+</script>
 </body>
 </html>
