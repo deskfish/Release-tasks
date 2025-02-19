@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -76,26 +77,14 @@
             gap: 8px;
         }
 
-        .custom-btn {
-            border-radius: 5px;
-            padding: 10px;
-            display: inline-block;
-            vertical-align: middle;
-        }
-
         .btn-success {
-            background-color: green;
+            background-color: #28a745;
             color: white;
-            display: inline-block;
-            vertical-align: middle;
-            width: 5px;
         }
 
         .btn-danger {
-            background-color: red;
+            background-color: #dc3545;
             color: white;
-            display: inline-block;
-            vertical-align: middle;
         }
 
         .btn:hover {
@@ -105,6 +94,12 @@
 
         .btn:active {
             transform: translateY(0);
+        }
+
+        .btn-group .btn {
+            padding: 6px 15px;
+            font-size: 0.9em;
+            border-radius: 10px;
         }
 
         .btn-group {
@@ -288,8 +283,61 @@
             width: 2rem;
             height: 2rem;
         }
+
+        .user-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            background: linear-gradient(to right, #ffffff, #f8f9fa);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .user-list-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-status {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 500;
+        }
+
+        .status-agreed {
+            border: 1px solid #90EE90;
+            color: #28a745;
+            background-color: rgba(144, 238, 144, 0.1);
+        }
+
+        .status-rejected {
+            border: 1px solid #ffcdd2;
+            color: #dc3545;
+            background-color: rgba(255, 205, 210, 0.1);
+        }
+
+        .status-unoperated {
+            border: 1px solid #ccc;
+            color: #666;
+            background-color: rgba(204, 204, 204, 0.1);
+        }
+
+        .operation-record-text {
+            text-align: right;
+            color: #0d6efd;
+            cursor: pointer;
+        }
+
+        .operation-record-text:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
+
 <body>
 <div class="container animate__animated animate__fadeIn" th:data-task-id="${task.id}">
     <div class="task-info">
@@ -300,7 +348,8 @@
             <li class="list-group-item"><strong>任务ID:</strong> <span th:text="${task.id}"></span></li>
             <li class="list-group-item"><strong>任务名称:</strong> <span th:text="${task.taskName}"></span></li>
             <li class="list-group-item"><strong>任务详情:</strong> <span th:text="${task.taskDetail}"></span></li>
-            <li class="list-group-item"><strong>需要同意的人数:</strong> <span th:text="${task.needAgreesCount}"></span>
+            <li class="list-group-item"><strong>需要同意的人数:</strong> <span
+                    th:text="${task.needAgreesCount}"></span>
             </li>
             <li class="list-group-item"><strong>当前已同意的人数:</strong> <span
                     th:text="${task.currentAgreeCount}"></span></li>
@@ -317,249 +366,276 @@
             <div class="progress">
                 <div class="progress-bar" role="progressbar"
                      th:style="'width: ' + ${task.currentAgreeCount * 100 / task.needAgreesCount} + '%'"
-                     th:aria-valuenow="${task.currentAgreeCount}"
-                     aria-valuemin="0"
+                     th:aria-valuenow="${task.currentAgreeCount}" aria-valuemin="0"
                      th:aria-valuemax="${task.needAgreesCount}">
                 </div>
             </div>
-            <div class="progress-stats mt-2">
-                <span class="current-count">已同意: <strong th:text="${task.currentAgreeCount}"></strong></span>
-                <span class="total-count">目标: <strong th:text="${task.needAgreesCount}"></strong></span>
+            <div class="progress-stats mt-2 d-flex justify-content-between align-items-center">
+                <span class="target-count">目标: <strong th:text="${task.needAgreesCount}"></strong></span>
+                <span id="operationRecordText" class="operation-record-text" style="display: none;">操作记录</span>
             </div>
         </div>
 
-        <div th:if="${task.taskInvalid}" class="alert alert-danger mt-4 animate__animated animate__fadeIn">❌
-            任务已失效
+        <div th:if="${task.taskInvalid}" class="alert alert-danger mt-4 animate__animated animate__fadeIn"
+             id="taskInvalidAlert">
+            ❌ 任务已失效
         </div>
         <div th:if="${task.end and !task.taskInvalid}"
-             class="alert alert-success mt-4 animate__animated animate__fadeIn">✅ 任务已执行
+             class="alert alert-success mt-4 animate__animated animate__fadeIn" id="taskCompletedAlert">
+            ✅ 任务已执行
         </div>
 
-        <div class="mb-4" th:if="${!task.end and !task.taskInvalid}">
-            <label class="form-label">请选择操作</label>
-            <div id="userList" class="list-group">
-                <!-- 用户列表将通过JavaScript动态加载 -->
-            </div>
+        <div class="mb-4" id="userList" style="display: none;">
+            <!-- 用户列表将通过JavaScript动态加载 -->
         </div>
 
-        <div class="mt-4 mb-4">
-            <button onclick="toggleIpRecords()" class="btn btn-info w-100 animate__animated" id="toggleIpRecordsBtn">
-                <i class="fas fa-list"></i> <span>查看点击状况</span>
-            </button>
-            <div id="ipRecordsList" class="list-group mt-3 animate__animated animate__fadeIn"
-                 style="display: none;"></div>
-        </div>
         <div id="actionFeedback" class="alert mt-3" style="display: none;"></div>
     </div>
-
-    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-    <script>
-        // 页面加载时获取所有用户列表
-        document.addEventListener('DOMContentLoaded', function () {
-            const taskId = document.querySelector('.container').getAttribute('data-task-id');
-
-            // 获取用户列表和操作记录
-            fetch('/release/' + taskId + '/user-records')
-                .then(response => response.json())
-                .then(response => {
-                    if (response.code === 200) {
-                        // 更新操作记录列表
-                        updateIpRecordsList(response.data);
-
-                        // 更新用户列表
-                        const userList = document.getElementById('userList');
-                        const unoperatedUsers = response.data.filter(record => !record.operated);
-
-                        if (unoperatedUsers.length === 0) {
-                            userList.innerHTML = '<div class="text-center text-muted p-3">暂无可选用户</div>';
-                            return;
-                        }
-
-                        unoperatedUsers.forEach(user => {
-                            const item = document.createElement('div');
-                            item.className = 'list-group-item d-flex justify-content-between align-items-center';
-                            item.innerHTML = `
-                            <div class="user-info">
-                                <strong>${user.displayName || user.username}</strong>
-                            </div>
-                          <div class="btn-group" role="group">
-                            <button onclick="submitDecision(true, '${user.username}')" class="btn btn-success " style="border-radius: 15px;  display: flex;  align-items: center; justify-content: center;">
-                                同意
-                            </button>
-                            <button onclick="submitDecision(false, '${user.username}')" class="btn btn-danger " style="border-radius: 15px;  display: flex; align-items: center; justify-content: center;">
-                             拒绝
-                            </button>
-                                </div>
-                        `;
-                            userList.appendChild(item);
-                        });
-                    }
-                })
-                .catch(error => {
-                    const userList = document.getElementById('userList');
-                    userList.innerHTML = '<div class="alert alert-danger">加载用户列表失败，请刷新页面重试</div>';
-                    document.getElementById('ipRecordsList').innerHTML = '<div class="alert alert-danger">加载操作记录失败，请刷新页面重试</div>';
-                });
-        });
-
-        function submitDecision(agreed, username) {
-            if (!username) {
-                showFeedback('用户信息无效', 'warning');
-                return;
-            }
-
-            const buttons = document.querySelectorAll('.btn-group button');
-            const taskId = document.querySelector('.container').getAttribute('data-task-id');
-
-            // 禁用按钮并显示加载动画
-            buttons.forEach(btn => {
-                btn.disabled = true;
-                btn.classList.add('animate__pulse');
-            });
-
-            fetch(`/release/${taskId}/approve`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `agreed=${agreed}&username=${encodeURIComponent(username)}`
-            })
-                .then(response => response.json())
-                .then(data => {
-                    buttons.forEach(btn => btn.classList.remove('animate__pulse'));
-
-                    if (data.code === 200) {
-                        showFeedback(agreed ? '✅ 已同意' : '❌ 已拒绝', 'success');
-                        setTimeout(() => location.reload(), 1500);
-                    } else {
-                        const errorMessage = data.message || '操作失败，请稍后重试';
-                        showFeedback(errorMessage, 'danger');
-
-                        if (data.code === 400 && (data.message.includes('已经操作过') || data.message.includes('无权操作'))) {
-                            buttons.forEach(btn => btn.disabled = true);
-                        } else {
-                            buttons.forEach(btn => {
-                                btn.disabled = false;
-                                btn.classList.remove('animate__pulse');
-                            });
-                        }
-                    }
-                })
-                .catch(error => {
-                    showFeedback('操作失败，请重试', 'danger');
-                    buttons.forEach(btn => {
-                        btn.disabled = false;
-                        btn.classList.remove('animate__pulse');
-                    });
-                });
-        }
-
-        function showFeedback(message, type) {
-            const feedback = document.getElementById('actionFeedback');
-            feedback.className = `alert alert-${type} mt-3 animate__animated animate__fadeIn`;
-            feedback.textContent = message;
-            feedback.style.display = 'block';
-        }
-
-        document.querySelectorAll('.btn-group button').forEach(btn => {
-            btn.addEventListener('mouseenter', () => {
-                btn.classList.add('animate__pulse');
-            });
-            btn.addEventListener('mouseleave', () => {
-                btn.classList.remove('animate__pulse');
-            });
-        });
-
-        function updateIpRecordsList(records) {
-            const ipRecordsList = document.getElementById('ipRecordsList');
-            if (records.length === 0) {
-                ipRecordsList.innerHTML = '<div class="text-center text-muted">暂无记录</div>';
-                return;
-            }
-
-            ipRecordsList.innerHTML = `
-            <div class="mb-3">
-                <h5>已点击用户</h5>
-                ${records.filter(record => record.operated).map(record => `
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>用户:</strong> ${record.displayName || record.username}
-                                <br>
-                                <small class="text-muted">${record.operationTime || '暂无操作时间'}</small>
-                            </div>
-                            <span class="badge ${record.agreed ? 'bg-success' : 'bg-danger'} rounded-pill">
-                                ${record.agreed ? '同意' : '拒绝'}
-                            </span>
-                        </div>
-                    </div>
-                `).join('') || '<div class="text-center text-muted">暂无已点击用户</div>'}
-            </div>
-            <div class="mt-4">
-                <h5>未点击用户</h5>
-                ${records.filter(record => !record.operated).map(record => `
-                    <div class="list-group-item">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <strong>用户:</strong> ${record.displayName || record.username}
-                            </div>
-                            <span class="badge bg-secondary rounded-pill">未操作</span>
-                        </div>
-                    </div>
-                `).join('') || '<div class="text-center text-muted">暂无未点击用户</div>'}
-            </div>
-        `;
-        }
-
-        function toggleIpRecords() {
-            const taskId = document.querySelector('.container').getAttribute('data-task-id');
-            const ipRecordsList = document.getElementById('ipRecordsList');
-            const toggleBtn = document.getElementById('toggleIpRecordsBtn');
-            const toggleBtnText = toggleBtn.querySelector('span');
-
-            if (ipRecordsList.style.display === 'none') {
-                ipRecordsList.innerHTML = '<div class="text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">加载中...</span></div></div>';
-                ipRecordsList.style.display = 'block';
-                toggleBtnText.textContent = '收起点击状况';
-
-                fetch(`/release/${taskId}/user-records`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.code === 200) {
-                            updateIpRecordsList(data.data);
-                        } else {
-                            ipRecordsList.innerHTML = `<div class="alert alert-danger">加载失败: ${data.message}</div>`;
-                        }
-                    })
-                    .catch(error => {
-                        ipRecordsList.innerHTML = '<div class="alert alert-danger">加载失败，请重试</div>';
-                    });
-            } else {
-                ipRecordsList.style.display = 'none';
-                toggleBtnText.textContent = '查看点击状况';
-            }
-        }
-    </script>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 <script>
-    // 更新北京时间的函数
-    function updateBeijingTime() {
-        const now = new Date();
-        const beijingTime = new Date(now.getTime() + now.getTimezoneOffset() * 60000 + 3600000 * 8);
-        const formattedTime = beijingTime.getFullYear() + '年' +
-            String(beijingTime.getMonth() + 1).padStart(2, '0') + '月' +
-            String(beijingTime.getDate()).padStart(2, '0') + '日 ' +
-            String(beijingTime.getHours()).padStart(2, '0') + '时' +
-            String(beijingTime.getMinutes()).padStart(2, '0') + '分' +
-            String(beijingTime.getSeconds()).padStart(2, '0') + '秒';
-        document.getElementById('beijingTime').textContent = '北京时间：' + formattedTime;
+    let isRecordVisible = false;
+
+    // 更新用户列表的函数，支持传入回调函数
+    function updateUserList(callback) {
+        console.log('开始更新用户列表');
+        const taskId = document.querySelector('.container').getAttribute('data-task-id');
+        const userList = document.getElementById('userList');
+        const actionFeedback = document.getElementById('actionFeedback');
+        const taskInvalidAlert = document.getElementById('taskInvalidAlert');
+        const taskCompletedAlert = document.getElementById('taskCompletedAlert');
+        const taskEnd = [[${task.end}]];
+        const taskInvalid = [[${task.taskInvalid}]];
+        const operationRecordText = document.getElementById('operationRecordText');
+
+        // 检查 userList 是否存在
+        if (!userList) {
+            console.error('未能获取到 userList 元素');
+            return;
+        }
+
+        fetch('/release/' + taskId + '/user-records')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('网络响应不正常: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(response => {
+                if (response.code === 200 && Array.isArray(response.data)) {
+                    if (taskEnd || taskInvalid) {
+                        // 任务已完成或已失效，隐藏用户列表，显示操作记录按钮
+                        userList.style.display = 'none';
+                        operationRecordText.style.display = 'block';
+                        operationRecordText.textContent = '操作记录';
+                        if (taskEnd && !taskInvalid && taskCompletedAlert) {
+                            taskCompletedAlert.style.display = 'block';
+                        }
+                        if (taskInvalid && taskInvalidAlert) {
+                            taskInvalidAlert.style.display = 'block';
+                        }
+                    } else {
+                        // 任务未完成且未失效，显示用户列表，隐藏操作记录按钮
+                        userList.style.display = 'block';
+                        operationRecordText.style.display = 'none';
+                        if (taskInvalidAlert) {
+                            taskInvalidAlert.style.display = 'none';
+                        }
+                        if (taskCompletedAlert) {
+                            taskCompletedAlert.style.display = 'none';
+                        }
+                    }
+
+                    userList.innerHTML = '';
+                    response.data.forEach(user => {
+                        const item = document.createElement('div');
+                        item.className = 'user-list-item';
+
+                        if (taskEnd || taskInvalid) {
+                            // 显示操作记录
+                            if (user.operated) {
+                                const statusClass = user.agreed ? 'status-agreed' : 'status-rejected';
+                                const statusText = user.agreed ? '已同意' : '已拒绝';
+                                const operateDate = new Date(user.operationTime);
+                                const year = operateDate.getFullYear();
+                                const month = String(operateDate.getMonth() + 1).padStart(2, '0');
+                                const day = String(operateDate.getDate()).padStart(2, '0');
+                                const hours = String(operateDate.getHours()).padStart(2, '0');
+                                const minutes = String(operateDate.getMinutes()).padStart(2, '0');
+                                const seconds = String(operateDate.getSeconds()).padStart(2, '0');
+                                const formattedTime = `${year}年${month}月${day}日 ${hours}:${minutes}:${seconds}`;
+
+                                item.innerHTML = `
+                                <div class="user-info">
+                                    <strong>${user.username}</strong>
+                                    <div class="operate-time">操作时间: ${formattedTime}</div>
+                                </div>
+                                <span class="user-status ${statusClass}">
+                                    ${statusText}
+                                </span>
+                            `;
+                            } else {
+                                item.innerHTML = `
+                                <div class="user-info">
+                                    <strong>${user.username}</strong>
+                                </div>
+                                <span class="user-status status-unoperated">
+                                    未操作
+                                </span>
+                            `;
+                            }
+                        } else {
+                            // 显示可操作列表
+                            if (user.operated) {
+                                const statusClass = user.agreed ? 'status-agreed' : 'status-rejected';
+                                const statusText = user.agreed ? '已同意' : '已拒绝';
+                                const operateDate = new Date(user.operationTime);
+                                const year = operateDate.getFullYear();
+                                const month = String(operateDate.getMonth() + 1).padStart(2, '0');
+                                const day = String(operateDate.getDate()).padStart(2, '0');
+                                const hours = String(operateDate.getHours()).padStart(2, '0');
+                                const minutes = String(operateDate.getMinutes()).padStart(2, '0');
+                                const seconds = String(operateDate.getSeconds()).padStart(2, '0');
+                                const formattedTime = `${year}年${month}月${day}日 ${hours}:${minutes}:${seconds}`;
+
+                                item.innerHTML = `
+                                <div class="user-info">
+                                    <strong>${user.username}</strong>
+                                    <div class="operate-time">操作时间: ${formattedTime}</div>
+                                </div>
+                                <span class="user-status ${statusClass}">
+                                    ${statusText}
+                                </span>
+                            `;
+                            } else {
+                                item.innerHTML = `
+                                <div class="user-info">
+                                    <strong>${user.username}</strong>
+                                </div>
+                                <div class="btn-group" role="group">
+                                    <button onclick="submitDecision(true, '${user.username}')" class="btn btn-success">同意</button>
+                                    <button onclick="submitDecision(false, '${user.username}')" class="btn btn-danger">拒绝</button>
+                                </div>
+                            `;
+                            }
+                        }
+                        userList.appendChild(item);
+                    });
+                    console.log('用户列表更新成功');
+                } else {
+                    userList.innerHTML = '<div class="alert alert-danger">获取用户列表失败，请稍后重试。</div>';
+                }
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            })
+            .catch(error => {
+                userList.innerHTML = '<div class="alert alert-danger">获取用户列表失败，请稍后重试。</div>';
+                console.error('获取用户列表时出错:', error);
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            });
     }
 
-    // 初始化时间显示并每秒更新
-    updateBeijingTime();
-    setInterval(updateBeijingTime, 1000);
+    // 提交决策的函数
+    function submitDecision(agreed, username) {
+        const taskId = document.querySelector('.container').getAttribute('data-task-id');
+        const actionFeedback = document.getElementById('actionFeedback');
+        actionFeedback.style.display = 'none';
+
+        const url = `/release/${taskId}/approve`;
+        const params = new URLSearchParams();
+        params.append('agreed', agreed);
+        params.append('username', username);
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params
+        })
+            .then(response => response.json())
+            .then(response => {
+                if (response.code === 200) {
+                    // 提交成功，刷新页面
+                    location.reload();
+                } else {
+                    actionFeedback.className = 'alert alert-danger';
+                    actionFeedback.textContent = response.message || '操作失败，请稍后重试。';
+                    actionFeedback.style.display = 'block';
+                }
+            })
+            .catch(error => {
+                actionFeedback.className = 'alert alert-danger';
+                actionFeedback.textContent = '网络错误，请稍后重试。';
+                actionFeedback.style.display = 'block';
+                console.error('提交决策时出错:', error);
+            });
+    }
+
+    // 操作记录文字点击事件处理函数
+    function toggleOperationRecord() {
+        const userList = document.getElementById('userList');
+        const operationRecordText = document.getElementById('operationRecordText');
+        const taskInvalidAlert = document.getElementById('taskInvalidAlert');
+        const taskCompletedAlert = document.getElementById('taskCompletedAlert');
+
+        if (isRecordVisible) {
+            // 收起操作记录
+            userList.style.display = 'none';
+            operationRecordText.textContent = '操作记录';
+            if (taskInvalidAlert) {
+                taskInvalidAlert.style.display = 'block';
+            }
+            if (taskCompletedAlert) {
+                taskCompletedAlert.style.display = 'block';
+            }
+        } else {
+            // 显示操作记录
+            userList.style.display = 'block';
+            operationRecordText.textContent = '收起';
+            if (taskInvalidAlert) {
+                taskInvalidAlert.style.display = 'none';
+            }
+            if (taskCompletedAlert) {
+                taskCompletedAlert.style.display = 'none';
+            }
+        }
+        isRecordVisible = !isRecordVisible;
+    }
+
+    // 页面加载完成后更新用户列表
+    document.addEventListener('DOMContentLoaded', function () {
+        updateUserList();
+        const operationRecordText = document.getElementById('operationRecordText');
+        operationRecordText.addEventListener('click', toggleOperationRecord);
+        // 可添加定时刷新列表逻辑
+        setInterval(updateUserList, 10000); // 每 10 秒刷新一次列表
+    });
+
+    // 显示北京时间
+    function showBeijingTime() {
+        const beijingTimeElement = document.getElementById('beijingTime');
+        const now = new Date();
+        const options = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            timeZone: 'Asia/Shanghai'
+        };
+        const beijingTime = now.toLocaleString('zh-CN', options);
+        beijingTimeElement.textContent = `当前北京时间: ${beijingTime}`;
+    }
+
+    // 每秒更新一次时间显示
+    setInterval(showBeijingTime, 1000);
+    showBeijingTime(); // 页面加载时先显示一次时间
 </script>
 </body>
 </html>
