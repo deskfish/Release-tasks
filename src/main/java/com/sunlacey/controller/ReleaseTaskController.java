@@ -6,12 +6,13 @@ import com.sunlacey.eneity.UserRecord;
 import com.sunlacey.service.ReleaseTaskService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -23,16 +24,17 @@ import java.util.List;
 public class ReleaseTaskController {
     private static final Logger logger = LoggerFactory.getLogger(ReleaseTaskController.class);
 
-    @Autowired
+    @Resource
     private ReleaseTaskService releaseTaskService;
 
+    // 缓存本地IPv4地址
+    private static String cachedLocalIPv4Address;
 
     @GetMapping("/detail/{id}")
     public String getTaskDetail(@PathVariable long id, Model model) {
         logger.info("正在获取任务详情，任务ID: {}", id);
         ReleaseTask task = releaseTaskService.getTaskById(id);
         if (task == null) {
-            logger.error("未找到指定任务，任务ID: {}", id);
             return "error";
         }
         logger.info("成功获取任务详情，任务ID: {}, 任务名称: {}", id, task.getTaskName());
@@ -56,7 +58,7 @@ public class ReleaseTaskController {
             logger.warn("创建任务失败：任务名称为空");
             return ApiResponse.error(400, "任务名称不能为空");
         }
-        if (selectedUsers == null || selectedUsers.isEmpty()) {
+        if (selectedUsers.isEmpty()) {
             logger.warn("创建任务失败：未选择用户");
             return ApiResponse.error(400, "必须选择至少一个用户");
         }
@@ -80,8 +82,11 @@ public class ReleaseTaskController {
         }
     }
 
-
+    // 获取本地IPv4地址的方法，使用缓存
     private String getLocalIPv4Address() {
+        if (cachedLocalIPv4Address != null) {
+            return cachedLocalIPv4Address;
+        }
         try {
             Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
             while (interfaces.hasMoreElements()) {
@@ -90,38 +95,34 @@ public class ReleaseTaskController {
                 while (addresses.hasMoreElements()) {
                     InetAddress inetAddress = addresses.nextElement();
                     if (!inetAddress.isLoopbackAddress() && inetAddress.getHostAddress().indexOf(':') == -1) {
-                        return inetAddress.getHostAddress();
+                        cachedLocalIPv4Address = inetAddress.getHostAddress();
+                        return cachedLocalIPv4Address;
                     }
                 }
             }
         } catch (Exception e) {
             logger.error("获取本地IPv4地址失败", e);
         }
-        return "127.0.0.1"; // 兜底返回本地回环地址
+        cachedLocalIPv4Address = "127.0.0.1"; // 兜底返回本地回环地址
+        return cachedLocalIPv4Address;
     }
 
-    // 修改为 GET 请求
     @GetMapping("/{id}/notice")
     public ModelAndView releaseNotice(@PathVariable long id) {
         logger.info("访问任务同意页面，任务ID: {}", id);
-        // 获取 id 对应的任务
         ReleaseTask task = releaseTaskService.getTaskById(id);
         if (task == null) {
-            logger.error("未找到指定任务，任务ID: {}", id);
             return new ModelAndView("error");
         }
         logger.info("成功获取任务信息，任务ID: {}, 任务名称: {}", id, task.getTaskName());
-        // 创建 ModelAndView 对象
         ModelAndView modelAndView = new ModelAndView("release-notice");
-        // 添加任务信息到模型
         modelAndView.addObject("task", task);
         return modelAndView;
     }
 
-
     @PostMapping("/{id}/approve")
     @ResponseBody
-    public ApiResponse<String> submitApproval(@PathVariable long id, @RequestParam boolean agreed, @RequestParam String username, HttpServletRequest request) {
+    public ApiResponse<String> submitApproval(@PathVariable long id, @RequestParam boolean agreed, @RequestParam String username) {
         ReleaseTask task = releaseTaskService.getTaskById(id);
         if (task == null) {
             return ApiResponse.error(404, "任务不存在");
@@ -131,14 +132,12 @@ public class ReleaseTaskController {
         }
 
         try {
-            String ipAddress = request.getRemoteAddr();
             releaseTaskService.updateAgreedStatus(id, agreed, username);
             return ApiResponse.success("操作成功");
         } catch (RuntimeException e) {
             return ApiResponse.error(400, e.getMessage());
         }
     }
-
 
     @GetMapping("/{id}/user-records")
     @ResponseBody
@@ -150,6 +149,4 @@ public class ReleaseTaskController {
             return ApiResponse.error(500, "获取IP记录失败");
         }
     }
-
-
 }
