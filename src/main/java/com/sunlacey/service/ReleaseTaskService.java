@@ -5,19 +5,19 @@ import com.sunlacey.eneity.UserRecord;
 import com.sunlacey.repository.ReleaseTaskRepository;
 import com.sunlacey.repository.UserRecordRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
 @Service
 public class ReleaseTaskService {
-    @Autowired
+    @Resource
     private ReleaseTaskRepository releaseTaskRepository;
 
-    @Autowired
+    @Resource
     private UserRecordRepository userRecordRepository;
 
     public List<UserRecord> getUserRecordsByTaskId(long taskId) {
